@@ -6,32 +6,41 @@ import { validEmail } from "../regex/validEmail";
 
 export const signUp: RequestHandler = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    let user = await User.findOne({ email });
+    const { user, email, password } = req.body;
 
-    if (user) {
+    let userDB = await User.findOne({ email:email?.toLowerCase() });
+    if (userDB) {
       return res.status(400).json({
         controller: "signUp",
-        message: "User already exists.",
+        message: "User already exists with this email.",
         ok: false,
       });
     }
 
-    user = new User(req.body);
+    userDB = await User.findOne({ user });
+    if (userDB) {
+      return res.status(400).json({
+        controller: "signUp",
+        message: "This user already existis.",
+        ok: false,
+      });
+    }
+
+    userDB = new User({...req.body,email:req.body.email?.toLowerCase()});
 
     //Encrypt the password
     const salt = genSaltSync();
-    user.password = hashSync(password, salt);
+    userDB.password = hashSync(password, salt);
 
-    await user.save();
+    await userDB.save();
 
     const token = await generateJWT({
-      ...user,
-      _id: user._id.toString(),
+      ...userDB,
+      _id: userDB._id.toString(),
     });
 
     return res.status(200).json({
-      ...user,
+      ...userDB,
       controller: "signUp",
       message: "Sign up successfully.",
       ok: true,
@@ -51,11 +60,10 @@ export const signIn: RequestHandler = async (req, res) => {
   try {
     const { email_user, password } = req.body;
 
-    const isEmail = validEmail.test(email_user) ? true : false;
+    const isEmail = validEmail.test(email_user?.toLowerCase()) ? true : false;
 
-    
     let user = await User.findOne({
-      [isEmail ? "email" : "user"]: email_user,
+      [isEmail ? "email" : "user"]: isEmail?email_user?.toLowerCase():email_user,
     });
 
     if (!user) {
@@ -93,10 +101,10 @@ export const signIn: RequestHandler = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-        controller: "signIn",
-        error,
-        message: "Please contact the administrator.",
-        ok:false,
-    })
+      controller: "signIn",
+      error,
+      message: "Please contact the administrator.",
+      ok: false,
+    });
   }
 };
