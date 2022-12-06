@@ -6,6 +6,6 @@ export const dbConnection = async () => {
 
     console.log(`Connected to: ${db.connection.name}`);
   } catch (error) {
-    throw new Error("Error initializing database\n");
+    throw new Error("Error initializing database\n: " + error);
   }
 };

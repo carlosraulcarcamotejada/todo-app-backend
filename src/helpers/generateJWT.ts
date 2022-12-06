@@ -1,22 +1,21 @@
 import { sign } from "jsonwebtoken";
+import { JwtPayload } from "../types/JwtPayload";
 
-
-export type tokenPayload = {
-  _id: string;
-  email: string;
-  name: string;
-  surname: string,
-  user: string;
-}
-
-export const generateJWT = (payload: tokenPayload): Promise<string | undefined> => {
+export const generateJWT = (
+  payload: JwtPayload
+): Promise<string | undefined> => {
   return new Promise((resolve, reject) => {
-    sign(payload, process.env.SECRET_JWT_SEED || "", (error, token) => {
-      if (error) {
-        console.log(error);
-        reject("Failed to generate token.");
+    sign(
+      payload,
+      process.env.SECRET_JWT_SEED || "",
+      // { expiresIn: "24h" },
+      (error, token) => {
+        if (error) {
+          console.log(error);
+          reject("Failed to generate token.");
+        }
+        resolve(token);
       }
-      resolve(token);
-    });
+    );
   });
 };

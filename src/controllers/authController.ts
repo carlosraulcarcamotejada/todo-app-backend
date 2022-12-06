@@ -2,14 +2,13 @@ import { RequestHandler } from "express";
 import { User } from "../models/UserModel";
 import { genSaltSync, hashSync, compareSync } from "bcryptjs";
 import { generateJWT } from "../helpers/generateJWT";
-import { validEmail } from "../regex/validEmail";
 
 export const signUp: RequestHandler = async (req, res) => {
   try {
-    const { user, email, password } = req.body;
+    const { email, password } = req.body;
 
-    let userDB = await User.findOne({ email:email?.toLowerCase() });
-    if (userDB) {
+    let user = await User.findOne({ email: email?.toLowerCase() });
+    if (user) {
       return res.status(400).json({
         controller: "signUp",
         message: "User already exists with this email.",
@@ -17,30 +16,20 @@ export const signUp: RequestHandler = async (req, res) => {
       });
     }
 
-    userDB = await User.findOne({ user });
-    if (userDB) {
-      return res.status(400).json({
-        controller: "signUp",
-        message: "This user already existis.",
-        ok: false,
-      });
-    }
-
-    userDB = new User({...req.body,email:req.body.email?.toLowerCase()});
+    user = new User({ ...req.body, email: req.body.email?.toLowerCase() });
 
     //Encrypt the password
     const salt = genSaltSync();
-    userDB.password = hashSync(password, salt);
+    user.password = hashSync(password, salt);
 
-    await userDB.save();
+    await user.save();
 
     const token = await generateJWT({
-      ...userDB,
-      _id: userDB._id.toString(),
+      _id: user._id.toString(),
     });
 
     return res.status(200).json({
-      ...userDB,
+      ...user,
       controller: "signUp",
       message: "Sign up successfully.",
       ok: true,
@@ -58,13 +47,9 @@ export const signUp: RequestHandler = async (req, res) => {
 
 export const signIn: RequestHandler = async (req, res) => {
   try {
-    const { email_user, password } = req.body;
+    const { email, password } = req.body;
 
-    const isEmail = validEmail.test(email_user?.toLowerCase()) ? true : false;
-
-    let user = await User.findOne({
-      [isEmail ? "email" : "user"]: isEmail?email_user?.toLowerCase():email_user,
-    });
+    let user = await User.findOne({ email });
 
     if (!user) {
       return res.status(400).json({
@@ -86,10 +71,6 @@ export const signIn: RequestHandler = async (req, res) => {
 
     const token = await generateJWT({
       _id: user?._id as unknown as string,
-      email: user?.email || "",
-      name: user?.name || "",
-      surname: user?.surname || "",
-      user: user?.user || "",
     });
 
     return res.status(200).json({
@@ -105,6 +86,29 @@ export const signIn: RequestHandler = async (req, res) => {
       error,
       message: "Please contact the administrator.",
       ok: false,
+    });
+  }
+};
+
+export const revalidateToken: RequestHandler = async (req, res) => {
+  try {
+    const { _id } = req.body;
+    const token = await generateJWT(req.body);
+
+    const user = await User.findOne({ _id });
+
+    return res.json({
+      ok: true,
+      controller: "revalidateToken",
+      message: "renewtoken",
+      token,
+      user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      controller: "revalidateToken",
+      message: "Please contact the administrator.",
     });
   }
 };
