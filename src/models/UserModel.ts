@@ -19,6 +19,9 @@ const UserSchema = new Schema(
       type: String,
       required: true,
     },
+    userImg: {
+      type: String,
+    },
   },
   {
     versionKey: false,

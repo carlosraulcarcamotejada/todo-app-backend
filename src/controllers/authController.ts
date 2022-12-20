@@ -90,6 +90,83 @@ export const signIn: RequestHandler = async (req, res) => {
   }
 };
 
+export const updateUser: RequestHandler = async (req, res) => {
+  try {
+    const _id = req.params?._id || "";
+    const user = await User.findById(_id);
+
+    if (!user) {
+      return res.status(404).json({
+        ok: false,
+        controller: "updateUser",
+        message: "User not found.",
+      });
+    }
+
+    const isSamePassword = compareSync(
+      req.body?.password || "",
+      user?.password || ""
+    );
+
+    let newPassword = "";
+    if (!isSamePassword) {
+      const salt = genSaltSync();
+      newPassword = hashSync(req.body?.password || "", salt);
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      _id,
+      {
+        ...req.body,
+        password: isSamePassword ? user.password : newPassword,
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      ok: true,
+      controller: "updateUser",
+      updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      controller: "updateUser",
+      message: "Please contact the administrator.",
+    });
+  }
+};
+
+export const deleteUser: RequestHandler = async (req, res) => {
+  try {
+    const _id = req.params?._id || "";
+
+    const user = await User.findById(_id);
+
+    if (!user) {
+      return res.status(404).json({
+        ok: false,
+        controller: "deleteUser",
+        message: "User not found.",
+      });
+    }
+
+    const deletedUser = await User.findByIdAndDelete(_id);
+
+    return res.status(200).json({
+      ok: true,
+      controller: "deleteUser",
+      deletedUser,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      controller: "deleteUser",
+      message: "Please contact the administrator.",
+    });
+  }
+};
+
 export const revalidateToken: RequestHandler = async (req, res) => {
   try {
     const { _id } = req.body;
