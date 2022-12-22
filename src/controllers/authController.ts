@@ -49,8 +49,7 @@ export const signIn: RequestHandler = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    let user = await User.findOne({ email });
-
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({
         controller: "signIn",
@@ -59,7 +58,7 @@ export const signIn: RequestHandler = async (req, res) => {
       });
     }
 
-    const validPassword = compareSync(password, user?.password || "");
+    const validPassword = compareSync(password, user.password);
 
     if (!validPassword) {
       return res.status(400).json({
@@ -74,7 +73,7 @@ export const signIn: RequestHandler = async (req, res) => {
     });
 
     return res.status(200).json({
-      ...user,
+      user,
       controller: "signIn",
       message: "Sign in successfully.",
       ok: true,
@@ -94,6 +93,7 @@ export const updateUser: RequestHandler = async (req, res) => {
   try {
     const _id = req.params?._id || "";
     const user = await User.findById(_id);
+    delete req.body.password;
 
     if (!user) {
       return res.status(404).json({
@@ -103,22 +103,10 @@ export const updateUser: RequestHandler = async (req, res) => {
       });
     }
 
-    const isSamePassword = compareSync(
-      req.body?.password || "",
-      user?.password || ""
-    );
-
-    let newPassword = "";
-    if (!isSamePassword) {
-      const salt = genSaltSync();
-      newPassword = hashSync(req.body?.password || "", salt);
-    }
-
     const updatedUser = await User.findByIdAndUpdate(
       _id,
       {
         ...req.body,
-        password: isSamePassword ? user.password : newPassword,
       },
       { new: true }
     );
@@ -126,12 +114,107 @@ export const updateUser: RequestHandler = async (req, res) => {
     return res.status(200).json({
       ok: true,
       controller: "updateUser",
+      message: "update User successfully",
       updatedUser,
     });
   } catch (error) {
     res.status(500).json({
       ok: false,
       controller: "updateUser",
+      message: "Please contact the administrator.",
+    });
+  }
+};
+
+export const updateUserPassword: RequestHandler = async (req, res) => {
+  try {
+    const _id = req.params?._id || "";
+    const user = await User.findById(_id);
+
+    const { actualPassword, newPassword } = req.body;
+
+    if (!user) {
+      return res.status(404).json({
+        ok: false,
+        controller: "updateUserPassword",
+        message: "User not found.",
+      });
+    }
+
+    console.log({ actualPassword });
+    console.log({ newPassword });
+
+    const samePassword = compareSync(actualPassword, user.password);
+
+    console.log({ samePassword });
+
+    if (!samePassword) {
+      return res.status(500).json({
+        ok: false,
+        controller: "updateUserPassword",
+        message: "incorrect password.",
+      });
+    }
+
+    //Encrypt the password
+    const salt = genSaltSync();
+
+    await User.findByIdAndUpdate(
+      _id,
+      {
+        password: samePassword ? hashSync(newPassword, salt) : user.password,
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      ok: true,
+      controller: "updateUserPassword",
+      message: "update User password successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      controller: "updateUserPassword",
+      message: "Please contact the administrator.",
+    });
+  }
+};
+
+export const updateUserImg: RequestHandler = async (req, res) => {
+  try {
+    const _id = req.params?._id || "";
+    const user = await User.findById(_id);
+
+    if (!user) {
+      return res.status(404).json({
+        ok: false,
+        controller: "updateUserPassword",
+        message: "User not found.",
+      });
+    }
+
+    const { userImg } = req.body;
+
+    await User.findByIdAndUpdate(
+      _id,
+      {
+        userImg,
+      },
+      { new: true }
+    );
+
+
+    return res.status(200).json({
+      ok: true,
+      controller: "updateUserImg",
+      message: "update User image successfully",
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      controller: "updateUserImg",
       message: "Please contact the administrator.",
     });
   }

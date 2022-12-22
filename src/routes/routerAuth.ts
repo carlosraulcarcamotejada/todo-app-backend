@@ -5,6 +5,8 @@ import {
   signIn,
   signUp,
   updateUser,
+  updateUserImg,
+  updateUserPassword,
 } from "../controllers/authController";
 import { check } from "express-validator";
 import { validateFields } from "../middlewares/validateFields";
@@ -37,6 +39,27 @@ routerAuth.put(
   ],
   updateUser
 );
+
+
+routerAuth.put("/updatepassword/:_id",
+[
+  //Middlewares validators
+  check("actualPassword").not().isEmpty().isLength({ min: 6, max: 12 }),
+  check("newPassword").not().isEmpty().isLength({ min: 6, max: 12 }),
+  validateFields,
+],
+updateUserPassword);
+
+
+routerAuth.put("/updateimg/:_id",
+[
+  //Middlewares validators
+  check("userImg").not().isEmpty(),
+  validateFields,
+],
+updateUserImg
+);
+
 
 routerAuth.post("/signin", signIn);
 
