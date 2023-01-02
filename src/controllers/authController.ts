@@ -49,7 +49,7 @@ export const signIn: RequestHandler = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(400).json({
         controller: "signIn",
@@ -204,13 +204,11 @@ export const updateUserImg: RequestHandler = async (req, res) => {
       { new: true }
     );
 
-
     return res.status(200).json({
       ok: true,
       controller: "updateUserImg",
       message: "update User image successfully",
     });
-
   } catch (error) {
     return res.status(500).json({
       ok: false,
