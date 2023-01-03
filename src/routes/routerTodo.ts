@@ -3,6 +3,7 @@ import {
   addTodo,
   deleteTodo,
   getTodos,
+  toggleTodo,
   updateTodo,
 } from "../controllers/todoController";
 
@@ -15,3 +16,5 @@ routerTodo.get("/:_id", getTodos);
 routerTodo.delete("/:_id", deleteTodo);
 
 routerTodo.put("/:_id", updateTodo);
+
+routerTodo.put("/toggletodo/:_id", toggleTodo);

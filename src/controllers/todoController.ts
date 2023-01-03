@@ -54,7 +54,7 @@ export const getTodos: RequestHandler = async (req, res) => {
   }
 };
 
-//======================== To edit an individual Todo ============================
+//======================== To update an individual Todo ============================
 export const updateTodo: RequestHandler = async (req, res) => {
   try {
     const _id = req.params?._id || "";
@@ -70,7 +70,7 @@ export const updateTodo: RequestHandler = async (req, res) => {
       });
     }
 
-    if (_id_user !== todo._id_user) {
+    if (_id_user !== todo._id_user.valueOf()) {
       return res.status(401).json({
         ok: false,
         controller: "editTodo",
@@ -93,6 +93,60 @@ export const updateTodo: RequestHandler = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       controller: "editTodo",
+      error,
+      message: "Please contact the administrator.",
+      ok: false,
+    });
+  }
+};
+
+//======================== To toggle a goal from a Todo ============================
+export const toggleTodo: RequestHandler = async (req, res) => {
+  try {
+    const _id = req.params?._id || "";
+    const _id_todo_goal = req.body?._id_todo_goal || "";
+    const _id_user = req.body?._id_user || "";
+
+    let todo = await Todo.findById({ _id });
+
+    if (!todo) {
+      return res.status(404).json({
+        ok: false,
+        controller: "editTodo",
+        message: "Record not found.",
+      });
+    }
+    console.log({ _id_user });
+    console.log(todo._id_user.valueOf());
+    if (_id_user !== todo._id_user.valueOf()) {
+      //console.log("entra al if de los privilegios")
+      return res.status(401).json({
+        ok: false,
+        controller: "editTodo",
+        message: "You do not have privileges to toggle this todo goal.",
+      });
+    }
+
+    // todo.todoGoals = todo.todoGoals.map((todoGoal) => {
+    //   if (todoGoal?._id?.valueOf() === _id_todo_goal) {
+    //     todoGoal.done = !todoGoal.done;
+    //   }
+    //   return todoGoal;
+    // });
+
+    const updatedTodo = await Todo.findByIdAndUpdate(_id, todo, {
+      new: true,
+    });
+
+    return res.status(200).json({
+      ok: true,
+      controller: "toggleTodo",
+      message: "Toggle todo goal successfully.",
+      updatedTodo,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      controller: "toggleTodo",
       error,
       message: "Please contact the administrator.",
       ok: false,

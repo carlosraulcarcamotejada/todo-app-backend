@@ -2,7 +2,6 @@ import { model, Schema } from "mongoose";
 
 const TodoSchema = new Schema(
   {
-
     todoTitle: {
       type: String,
       required: true,
