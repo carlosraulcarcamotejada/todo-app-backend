@@ -104,8 +104,7 @@ export const updateTodo: RequestHandler = async (req, res) => {
 export const toggleTodo: RequestHandler = async (req, res) => {
   try {
     const _id = req.params?._id || "";
-    const _id_todo_goal = req.body?._id_todo_goal || "";
-    const _id_user = req.body?._id_user || "";
+    const { _id_user, _id_todo_goal } = req.body || "";
 
     let todo = await Todo.findById({ _id });
 
@@ -116,10 +115,8 @@ export const toggleTodo: RequestHandler = async (req, res) => {
         message: "Record not found.",
       });
     }
-    console.log({ _id_user });
-    console.log(todo._id_user.valueOf());
+
     if (_id_user !== todo._id_user.valueOf()) {
-      //console.log("entra al if de los privilegios")
       return res.status(401).json({
         ok: false,
         controller: "editTodo",
@@ -127,12 +124,21 @@ export const toggleTodo: RequestHandler = async (req, res) => {
       });
     }
 
-    // todo.todoGoals = todo.todoGoals.map((todoGoal) => {
-    //   if (todoGoal?._id?.valueOf() === _id_todo_goal) {
-    //     todoGoal.done = !todoGoal.done;
-    //   }
-    //   return todoGoal;
-    // });
+    let totalComlpeteTodoGoals: number = 0;
+
+    todo.todoGoals = todo.todoGoals.map((todoGoal) => {
+      const tempTodoGoal: any = todoGoal;
+      if (tempTodoGoal._id?.valueOf() === _id_todo_goal) {
+        tempTodoGoal.done = !todoGoal.done;
+      }
+      todoGoal.done&&totalComlpeteTodoGoals++;
+
+      return tempTodoGoal;
+    });
+
+    totalComlpeteTodoGoals === todo.todoGoals.length
+      ? (todo.completed = true)
+      : (todo.completed = false);
 
     const updatedTodo = await Todo.findByIdAndUpdate(_id, todo, {
       new: true,

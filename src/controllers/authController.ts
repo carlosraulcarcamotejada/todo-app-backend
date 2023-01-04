@@ -141,9 +141,6 @@ export const updateUserPassword: RequestHandler = async (req, res) => {
       });
     }
 
-    console.log({ actualPassword });
-    console.log({ newPassword });
-
     const samePassword = compareSync(actualPassword, user.password);
 
     console.log({ samePassword });
@@ -185,6 +182,7 @@ export const updateUserImg: RequestHandler = async (req, res) => {
   try {
     const _id = req.params?._id || "";
     const user = await User.findById(_id);
+    const { userImg } = req.body;
 
     if (!user) {
       return res.status(404).json({
@@ -193,8 +191,6 @@ export const updateUserImg: RequestHandler = async (req, res) => {
         message: "User not found.",
       });
     }
-
-    const { userImg } = req.body;
 
     await User.findByIdAndUpdate(
       _id,
