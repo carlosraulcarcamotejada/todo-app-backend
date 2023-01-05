@@ -131,7 +131,7 @@ export const toggleTodo: RequestHandler = async (req, res) => {
       if (tempTodoGoal._id?.valueOf() === _id_todo_goal) {
         tempTodoGoal.done = !todoGoal.done;
       }
-      todoGoal.done&&totalComlpeteTodoGoals++;
+      todoGoal.done && totalComlpeteTodoGoals++;
 
       return tempTodoGoal;
     });
@@ -159,6 +159,46 @@ export const toggleTodo: RequestHandler = async (req, res) => {
     });
   }
 };
+
+//======================== To delete a Todo goal ============================
+export const deleteTodoGoal: RequestHandler = async (req, res) => {
+  try {
+  } catch (error) {
+    return res.status(500).json({
+      controller: "deleteTodoGoal",
+      error,
+      message: "Please contact the administrator.",
+      ok: false,
+    });
+  }
+};
+
+//======================== To update a Todo goal ============================
+export const updateTodoGoal: RequestHandler = async (req, res) => {
+    try {
+    } catch (error) {
+      return res.status(500).json({
+        controller: "updateTodoGoal",
+        error,
+        message: "Please contact the administrator.",
+        ok: false,
+      });
+    }
+  };
+
+//======================== To update a Todo goal ============================
+export const addTodoGoal: RequestHandler = async (req, res) => {
+    try {
+    } catch (error) {
+      return res.status(500).json({
+        controller: "updateTodoGoal",
+        error,
+        message: "Please contact the administrator.",
+        ok: false,
+      });
+    }
+  };
+
 
 //======================== To delete an individual Todo ============================
 export const deleteTodo: RequestHandler = async (req, res) => {
