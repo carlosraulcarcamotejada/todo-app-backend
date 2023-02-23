@@ -3,6 +3,8 @@ import { User } from "../models/UserModel";
 import { genSaltSync, hashSync, compareSync } from "bcryptjs";
 import { generateJWT } from "../helpers/generateJWT";
 
+
+//================================== For sign up ===================================
 export const signUp: RequestHandler = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -45,6 +47,7 @@ export const signUp: RequestHandler = async (req, res) => {
   }
 };
 
+//================================== For sign in ===================================
 export const signIn: RequestHandler = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -89,6 +92,8 @@ export const signIn: RequestHandler = async (req, res) => {
   }
 };
 
+
+//================================== For update user ===================================
 export const updateUser: RequestHandler = async (req, res) => {
   try {
     const _id = req.params?._id || "";
@@ -126,6 +131,7 @@ export const updateUser: RequestHandler = async (req, res) => {
   }
 };
 
+//================================== For update the user password ===================================
 export const updateUserPassword: RequestHandler = async (req, res) => {
   try {
     const _id = req.params?._id || "";
@@ -178,6 +184,7 @@ export const updateUserPassword: RequestHandler = async (req, res) => {
   }
 };
 
+//================================== For update user img ===================================
 export const updateUserImg: RequestHandler = async (req, res) => {
   try {
     const _id = req.params?._id || "";
@@ -214,6 +221,7 @@ export const updateUserImg: RequestHandler = async (req, res) => {
   }
 };
 
+//================================== For delete user ===================================
 export const deleteUser: RequestHandler = async (req, res) => {
   try {
     const _id = req.params?._id || "";
@@ -244,6 +252,7 @@ export const deleteUser: RequestHandler = async (req, res) => {
   }
 };
 
+//================================== For revalidate token ===================================
 export const revalidateToken: RequestHandler = async (req, res) => {
   try {
     const { _id } = req.body;

@@ -1,10 +1,23 @@
 import { RequestHandler } from "express";
 import { Todo } from "../models/TodoModel";
+import { User } from "../models/UserModel";
 
 //======================== To add a Todo ============================
 export const addTodo: RequestHandler = async (req, res) => {
   try {
     const newTodo = new Todo(req.body);
+
+    const _id_user = req.body._id_user || "";
+
+    const user = await User.find({ _id_user });
+
+    if (!user) {
+      return res.status(404).json({
+        ok: false,
+        message: "This User doesn't exist.",
+        controller: "addTodo",
+      });
+    }
 
     const savedTodo = await newTodo.save();
 
@@ -65,15 +78,15 @@ export const updateTodo: RequestHandler = async (req, res) => {
     if (!todo) {
       return res.status(404).json({
         ok: false,
-        controller: "editTodo",
-        message: "Record not found.",
+        controller: "updateTodo",
+        message: "Todo not found.",
       });
     }
 
     if (_id_user !== todo._id_user.valueOf()) {
       return res.status(401).json({
         ok: false,
-        controller: "editTodo",
+        controller: "updateTodo",
         message: "You do not have privileges to edit this todo.",
       });
     }
@@ -86,13 +99,54 @@ export const updateTodo: RequestHandler = async (req, res) => {
 
     return res.status(200).json({
       ok: true,
-      controller: "editTodo",
+      controller: "updateTodo",
       message: "Todo updated successfully.",
       updatedTodo,
     });
   } catch (error) {
     return res.status(500).json({
-      controller: "editTodo",
+      controller: "updateTodo",
+      error,
+      message: "Please contact the administrator.",
+      ok: false,
+    });
+  }
+};
+
+//======================== To delete an individual Todo ============================
+export const deleteTodo: RequestHandler = async (req, res) => {
+  try {
+    const _id = req.params?._id || "";
+    const { _id_user } = req.body || "";
+    const todo = await Todo.findById(_id);
+
+    if (!todo) {
+      return {
+        ok: false,
+        controller: "deleteTodo",
+        message: "Todo not found.",
+      };
+    }
+
+    if (_id_user !== todo._id_user.valueOf()) {
+      return res.status(401).json({
+        ok: false,
+        controller: "deleteTodo",
+        message: "You do not have privileges to delete this todo.",
+      });
+    }
+
+    const deletedTodo = await Todo.findByIdAndDelete(_id);
+
+    return res.status(200).json({
+      ok: true,
+      message: "Todo erased successfully",
+      controller: "deleteTodo",
+      deletedTodo,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      controller: "deleteTodo",
       error,
       message: "Please contact the administrator.",
       ok: false,
@@ -111,15 +165,15 @@ export const toggleTodo: RequestHandler = async (req, res) => {
     if (!todo) {
       return res.status(404).json({
         ok: false,
-        controller: "editTodo",
-        message: "Record not found.",
+        controller: "toggleTodo",
+        message: "Todo not found.",
       });
     }
 
     if (_id_user !== todo._id_user.valueOf()) {
       return res.status(401).json({
         ok: false,
-        controller: "editTodo",
+        controller: "toggleTodo",
         message: "You do not have privileges to toggle this todo goal.",
       });
     }
@@ -153,87 +207,6 @@ export const toggleTodo: RequestHandler = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       controller: "toggleTodo",
-      error,
-      message: "Please contact the administrator.",
-      ok: false,
-    });
-  }
-};
-
-//======================== To delete a Todo goal ============================
-export const deleteTodoGoal: RequestHandler = async (req, res) => {
-  try {
-  } catch (error) {
-    return res.status(500).json({
-      controller: "deleteTodoGoal",
-      error,
-      message: "Please contact the administrator.",
-      ok: false,
-    });
-  }
-};
-
-//======================== To update a Todo goal ============================
-export const updateTodoGoal: RequestHandler = async (req, res) => {
-    try {
-    } catch (error) {
-      return res.status(500).json({
-        controller: "updateTodoGoal",
-        error,
-        message: "Please contact the administrator.",
-        ok: false,
-      });
-    }
-  };
-
-//======================== To update a Todo goal ============================
-export const addTodoGoal: RequestHandler = async (req, res) => {
-    try {
-    } catch (error) {
-      return res.status(500).json({
-        controller: "updateTodoGoal",
-        error,
-        message: "Please contact the administrator.",
-        ok: false,
-      });
-    }
-  };
-
-
-//======================== To delete an individual Todo ============================
-export const deleteTodo: RequestHandler = async (req, res) => {
-  try {
-    const _id = req.params?._id || "";
-    const { _id_user } = req.body || "";
-    const todo = await Todo.findById(_id);
-
-    if (!todo) {
-      return {
-        ok: false,
-        controller: "deleteTodo",
-        message: "Record not found.",
-      };
-    }
-
-    if (_id_user !== todo._id_user.valueOf()) {
-      return res.status(401).json({
-        ok: false,
-        controller: "deleteTodo",
-        message: "You do not have privileges to delete this todo.",
-      });
-    }
-
-    const deletedTodo = await Todo.findByIdAndDelete(_id);
-
-    return res.status(200).json({
-      ok: true,
-      message: "Todo erased successfully",
-      controller: "deleteTodo",
-      deletedTodo,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      controller: "deleteTodo",
       error,
       message: "Please contact the administrator.",
       ok: false,

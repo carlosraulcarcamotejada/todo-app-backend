@@ -17,4 +17,6 @@ routerTodo.delete("/:_id", deleteTodo);
 
 routerTodo.put("/:_id", updateTodo);
 
-routerTodo.put("/toggletodo/:_id", toggleTodo);
+routerTodo.put("/toggletodogoal/:_id", toggleTodo);
+
+
